@@ -30,14 +30,10 @@ On your own computer:
 
 Now you should have your own fork (copy) of the foundations repository (folder) cloned (downloaded) onto your own computer.
 
-### Create a fresh, new, virtual environment
-@TODO add instructions from previous years.
-
-`source venv/bin/activate`
 
 ### Before you continue: check your version of python
 
-Make sure that you are using a version of Python which is relatively new, at least version 3.8. You can check this by using the command `python --version`at the command line. You can also a very fancy script by typing `python check_setup/version_check.py`.
+Make sure that you are using a version of Python which is relatively new, at least version 3.8. You can check this by using the command `python --version` at the command line. You can also a very fancy script by typing `python check_setup/version_check.py`.
 
 You should see something like this:
 
@@ -46,6 +42,38 @@ You should see something like this:
 If you see a longer message (`### oh no! ###`), you are using a version of Python which is too old. You will need to use Python 3.8 or newer. Like with all other software, you have to update the language itself from time to time.
 
 Keep in mind that many computers have multiple versions of Python installed on them. It might be that you need to type `python`, `Python`, `python3`,`python3.8`, or something else, to get a version that you have already installed. Or you may need install it.
+
+### Setup your local working virtual environment and install libraries
+Change directory (`cd`) into the repository that you just cloned from GitHub. It will look something like this: 
+
+![Change Working Directory](./documentation/cd-workingdirectory.png?raw=true)
+
+You are now in the top level working directory of the Foundations repository. In order to use this, create a new virtual environment: 
+
+ `python3 -m venv venv`
+
+This will make a copy of the Python application - the programming language itself - in the directory you are working in. This allows you create something of a sandbox: the ability to run your code separately from anything else happening on your computer. As we write our own code and install code other people have written which is not a part of python itself, called libraries, this becomes more and more important to keep things running smoothly. 
+
+After creating your new virtual environment (making a local copy of Python), you need to tell your terminal to use that new version of Python, instead of the one on your whole computer. To do this, we use the activate script: 
+
+`source venv/bin/activate`
+
+Depending on how your terminal is configured, you may see something like `(venv)` added to the prompt (the prompt is the part to the left of your cursor. It may show your directory or username, for instance). 
+
+In order to check which version of Python your current terminal is configured to use, the command `which` comes in handy. It shows the path (location) of an executable (application) which is currently being used. Before activating the virtual environment, it will point to something which is system or user-wide. After activation, it will point to a path which contains your new working directory, specific to this project: 
+
+![Change Working Directory](./documentation/venv-activate-which.png?raw=true)
+
+Now we have our very own version of Python for this project which we can play around with. The Python language can do a lot, but not everything. It is common practice to develop a "library", which is additional code that can be installed to do more things with the language. You can think of it like a plugin for an application. Python is open-source, and there are many open-source libraries which we can install additionally. We will install a set of tools which are very helpful for web development, since that is what class focuses on (you can imagine that if the goal were to develop a desktop video game instead of a website, we would need other pieces of code, or libraries). 
+
+To install the libraries we need, we will use the command `pip`. Pip is a tool to help us manage (install, check versions, etc..) the external python code we are installing. We could use the command pip and give it a specific package name, but that would be a lot of typing, hard to reproduce, and easy to make mistakes. We will use a file called `requirements.txt`, which lists the packages and their specific versions that we need. Have a look at that file now, sitting in the repository. This is a big step towards having a reproducible environment - which is a fancy way of saying that you have confidence that your software will continue to run. Because we are using the same versions of the same libraries on all students' computers and on the servers we will rent from Google Cloud later, we can be relatively confident that it works as expected. It happens all the time that someone updates a library that they maintain (adding a feature, for instance), which inadvertently breaks compatibility with another library that someone else maintains. We want to prevent that from happening, so we can use specific versions of third-party code, just like we will use specific versions of our own code using version control (git). To do install the third-party libraries, use the command
+
+`pip install -r requirements`
+
+You should see a lot of output on the screen, and somewhere towards the bottom a message that says you have successfully installed, something like this: 
+
+![Change Working Directory](./documentation/successful-install.png?raw=true)
+
 
 ### Run the "Hello, World!" website on your own computer
 
@@ -72,7 +100,7 @@ Building on the previous example, we will use a framework for building websites 
 
 Running a website using Flask using the same basic command, `uwsgi`, but requires a few more arguments:
 
-> uwsgi --http-socket 127.0.0.1:8080 --wsgi-file sample_website/website.py --callable app --processes 4 --threads 2 --stats 127.0.0.1:8181 -H venv/
+`uwsgi --http-socket 127.0.0.1:8080 --wsgi-file sample_website/website.py --callable app --processes 4 --threads 2 --stats 127.0.0.1:8181 -H venv/`
 
 You should now be able to go http://localhost:8080 in your browser and see the Hello, Flask! Website
 
@@ -183,34 +211,38 @@ Once you have done this, you have successfully edited files on your own computer
 
 ## Deploying Your Website
 
-based roughly on https://github.com/google-github-actions/deploy-appengine
+When we build a website, we usually want it to be on the internet for people to see. We will automatically deploy to Google Cloud's App Engine using GitHub Actions. Once this is fully configured, simply pushing to GitHub will a: 
 
-#### On GCP
+- lint your code
+- test your code 
+- deploy your code 
 
-1. Get cloud credits [LINK]
-1. create project https://cloud.google.com/resource-manager/docs/creating-managing-projects
-1. create app engine application https://console.cloud.google.com/appengine/create (europe-west-3 is FRA)
-1. create service account https://cloud.google.com/iam/docs/creating-managing-service-accounts
+This is already configured in the file `.github/workflows/main.yml`. I encourage you to have a look at it and try to understand what it is doing - some of these commands will look familiar, some will not. 
 
-![Permissions](./documentation/service-account-permissions.png?raw=true)
+The full, step-by-step instructions for using GitHub Actions to deploy to google cloud can be found in the PDF located at `documentation/DeployToGCPfromGitHub.pdf`, or the [Miro Board from class](https://miro.com/app/board/o9J_lTxsze4=/). Note that step 7 is an optional, additional way to deploy. Once you have finished step 6, pushing to GitHub should automatically deploy to Google Cloud Platform (GCP). Be sure to get credits for GCP first, linked in the week's assignment. 
 
-1. enable app engine api https://console.developers.google.com/apis/library/appengine.googleapis.com
+There are two additional files in your repository worth looking into right now: `main.py` and `app.yaml`, both used by GCP to configure your software - in other words, to know what to do. You will have to work with the file `main.py`: this imports one of the many websites (applications) from the repository. It allows us to have multiple websites in this repository, and then select the one we will run. It only needs one line of code, but that line is important! The file `app.yaml` specifies some settings for Google App Engine itself, for example, the version of Python and the size of the computer we want to use (F2). You shouldn't need to touch this file anytime soon. 
 
-1. enable cloud buld api
-https://console.cloud.google.com/marketplace/product/google/cloudbuild.googleapis.com
+Once you are done, you should be able to edit code on your computer, then `git push` to GitHub, which will in turn test, lint, and deploy your code to Google Cloud, running it live on the internet! 
 
-1. allow cloud build to deploy to app engine
-https://cloud.google.com/cloud-build/docs/deploying-builds/deploy-appengine#grant-permissions
+![The Sample Website, Live!](./documentation/FlaskLiveGCP.png?raw=true)
+Note the URL of this page: this is live on the internet, not running locally on your own computer!
 
+That's it, you're done setting it up! Continue with this week's assignment :)
 
-1. Give service account permission to act as project accountt (???) --> https://github.com/DrAdamRoe/foundations-sample-website-/runs/1558999799?check_suite_focus=true
+#### More Details on GCP
 
-1. get service account private key
-https://cloud.google.com/iam/docs/creating-managing-service-account-keys
-
---> you should now have a .JSON file on your own computer
-
-
-On GitHub:
-1. Add secret https://docs.github.com/en/free-pro-team@latest/actions/reference/encrypted-secrets
+These instructions are based loosely on the [official workflow](https://github.com/google-github-actions/deploy-appengine), adopted for class. The following links provide more information about specific steps along the way, which may help if you get stuck working with google cloud platform (GCP):
+- [Create "Project" on GCP](https://cloud.google.com/resource-manager/docs/creating-managing-projects)
+- [Create App Engine application](https://console.cloud.google.com/appengine/create) in europe-west-3, in Frankfurt.
+- [Create service account](https://cloud.google.com/iam/docs/creating-managing-service-accounts)
+- The expected permissions should be: ![Permissions](./documentation/service-account-permissions.png?raw=true)
+- [Enable App Engine api](https://console.developers.google.com/apis/library/appengine.googleapis.com)
+- [Enable Could Build API](
+https://console.cloud.google.com/marketplace/product/google/cloudbuild.googleapis.com)
+- [Allow Cloud Build to deploy to App Engine](
+https://cloud.google.com/cloud-build/docs/deploying-builds/deploy-appengine#grant-permissions)
+- Give service account permission to act as project account 
+- [Get service account private key](https://cloud.google.com/iam/docs/creating-managing-service-account-keys) --> you should now have a .JSON file on your own computer. This is a password, do not share it! 
+- [On GitHub, add that .JSON password, allowing GitHub to deploy to GCP](https://docs.github.com/en/free-pro-team@latest/actions/reference/encrypted-secrets)
 
